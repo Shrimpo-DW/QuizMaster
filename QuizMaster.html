@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QuizMaster</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--tx:#14213d;--mu:#5b6680;--bd:#d9e0ee;--ac:#2b4fd6;--hl:#ffd23f;--ok:#1f9d63;--bad:#d64045;--g5:#2a9d8f;--g7:#3a6ea5;--g9:#8e4585;--grid:rgba(43,79,214,.06);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1526;--card:#16213a;--tx:#eaf0ff;--mu:#9aa8c7;--bd:#2a3858;--ac:#7c9cff;--grid:rgba(124,156,255,.07);--g5:#4fc3b4;--g7:#6aa3e0;--g9:#c47bbb;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1526;--card:#16213a;--tx:#eaf0ff;--mu:#9aa8c7;--bd:#2a3858;--ac:#7c9cff;--grid:rgba(124,156,255,.07);--g5:#4fc3b4;--g7:#6aa3e0;--g9:#c47bbb;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 'DM Sans',system-ui,sans-serif;color:var(--tx);background:var(--bg) linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 28px;min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--card);z-index:10}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;margin:0;line-height:1.15}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:11;background:var(--card);border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font:800 22px 'Bricolage Grotesque',sans-serif;cursor:pointer;margin-right:auto;background:linear-gradient(transparent 62%,var(--hl) 62%)}
+.pill{border:1px solid var(--bd);border-radius:99px;padding:4px 12px;font-weight:700;font-size:14px;background:var(--bg)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.ib{border:1px solid var(--bd);background:var(--bg);border-radius:10px;padding:5px 10px}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+nav{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tab{border:0;background:none;padding:8px 14px;border-radius:10px;font-weight:700;color:var(--mu)}
+.tab.on{background:var(--tx);color:var(--bg)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.chip{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:5px 14px;font-weight:500}
+.chip.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-left:6px solid var(--c);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.card .em{font-size:30px}.mu{color:var(--mu);font-size:14px}
+.btn{border:0;background:var(--ac);color:#fff;font-weight:700;padding:10px 18px;border-radius:10px}
+.btn.alt{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.q{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:22px;max-width:680px;margin:0 auto}
+.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden;margin:10px 0 20px}.bar i{display:block;height:100%;background:var(--ac);transition:width .3s}
+.opt{display:flex;gap:12px;width:100%;text-align:left;padding:13px 14px;margin-bottom:10px;border-radius:12px;border:2px solid var(--bd);background:var(--bg);font-weight:500}
+.opt b{width:26px;height:26px;border-radius:8px;background:var(--card);display:grid;place-items:center;flex:none;font-size:13px}
+.opt:not(:disabled):hover{border-color:var(--ac)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--bg))}
+.opt.no{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 16%,var(--bg))}
+.opt.gone{opacity:.3;text-decoration:line-through}
+.why{padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hl) 30%,var(--card));margin:4px 0 14px;font-size:15px}
+.big{font:800 56px 'Bricolage Grotesque',sans-serif}
+.tut{white-space:pre-line;font-size:15px;background:var(--bg);border-radius:10px;padding:12px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,30px);opacity:0;background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:12px;font-weight:700;transition:.25s;z-index:20;pointer-events:none}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.hero{background:linear-gradient(135deg,#2b4fd6,#8e4585);color:#fff;border-radius:22px;padding:32px 26px;position:relative;overflow:hidden}.hero h1{font-size:clamp(30px,6vw,48px)}.hero p{max-width:520px;margin:10px 0 0;opacity:.92}.hero::after{content:"?";position:absolute;right:20px;top:-40px;font:800 200px 'Bricolage Grotesque',sans-serif;opacity:.15}
+.card{transition:transform .15s,box-shadow .15s}.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(20,33,61,.14)}
+.card .em{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--c) 18%,var(--card));font-size:28px}
+select.ib{max-width:120px}
+.logo{background:none;display:flex;align-items:center;gap:9px;font-size:23px;letter-spacing:-.5px}.logo span{background:linear-gradient(transparent 68%,var(--hl) 68%)}
+dialog{border:1px solid var(--bd);border-radius:18px;background:var(--card);color:var(--tx);padding:24px;width:min(380px,92vw)}dialog::backdrop{background:rgba(10,16,32,.6)}
+dialog label{display:block;font-weight:700;font-size:14px;margin:12px 0}dialog input{display:block;width:100%;margin-top:5px;padding:10px 12px;border:2px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}dialog input:focus{outline:none;border-color:var(--ac)}
+.lnk{border:0;background:none;color:var(--ac);font-weight:700;padding:0}
+:root{--b1:rgba(43,79,214,.24);--b2:rgba(142,69,133,.2);--b3:rgba(42,157,143,.2)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--b1:rgba(99,132,255,.3);--b2:rgba(190,100,180,.22);--b3:rgba(60,190,170,.16)}}
+:root[data-theme="dark"]{--b1:rgba(99,132,255,.3);--b2:rgba(190,100,180,.22);--b3:rgba(60,190,170,.16)}
+body{background:radial-gradient(900px 520px at 8% -8%,var(--b1),transparent 62%),radial-gradient(800px 520px at 100% 6%,var(--b2),transparent 62%),radial-gradient(800px 520px at 50% 108%,var(--b3),transparent 62%),var(--bg);background-attachment:fixed}
+header{background:color-mix(in srgb,var(--card) 78%,transparent);backdrop-filter:blur(14px)}
+.card,.q{background:color-mix(in srgb,var(--card) 80%,transparent);backdrop-filter:blur(10px)}
+.pill,.btn,#nm{display:inline-flex;align-items:center;gap:6px}[data-i]{display:inline-flex}.card .em{color:var(--c)}
+h2{font-size:clamp(24px,4vw,32px)}footer{text-align:center;padding:10px 16px 40px;font-size:13px}
+.hero{box-shadow:0 18px 40px -18px rgba(43,79,214,.55)}.hero .btn{background:#fff;color:#2b4fd6}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.st{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:14px;padding:8px 16px;backdrop-filter:blur(6px)}.st b{display:block;font:800 24px 'Bricolage Grotesque',sans-serif}.st small{opacity:.88}
+.badge{align-self:flex-start;font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.dots{display:flex;gap:4px}.dots i{width:20px;height:6px;border-radius:9px;background:var(--bd)}.dots i.f{background:var(--c)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.ring{width:156px;height:156px;border-radius:50%;margin:6px auto 14px;display:grid;place-items:center;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--bd) 0);animation:pop .5s cubic-bezier(.2,1.4,.4,1)}.ring div{width:124px;height:124px;border-radius:50%;background:var(--card);display:grid;place-items:center;font:800 40px 'Bricolage Grotesque',sans-serif}
+.av{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#2b4fd6,#8e4585);color:#fff;display:grid;place-items:center;font:800 30px 'Bricolage Grotesque',sans-serif;margin:0 auto 10px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}.sg div{background:var(--bg);border-radius:12px;padding:10px;text-align:center;font-size:13px}.sg b{display:block;font:800 22px 'Bricolage Grotesque',sans-serif}
+.opt{transition:transform .1s,border-color .15s}.opt.sel{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,var(--bg))}.opt:not(:disabled):active{transform:scale(.99)}
+</style>
+</head>
+<body>
+<header>
+<div class="logo" onclick="go('home')" role="link" tabindex="0" aria-label="QuizMaster home"><svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><defs><linearGradient id="lgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4fd6"/><stop offset="1" stop-color="#8e4585"/></linearGradient></defs><rect width="36" height="36" rx="10" fill="url(#lgg)"/><circle cx="17" cy="17" r="8.5" fill="none" stroke="#fff" stroke-width="3.2"/><path d="M13.5 17.5l3 3 7-8.5" fill="none" stroke="#ffd23f" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 23l5.5 5.5" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg><span>QuizMaster</span></div>
+<span class="pill" title="Points"><i data-i="coin"></i><span id="pp">0</span></span><span class="pill" title="Tips"><i data-i="bulb"></i><span id="pt">0</span></span><span class="pill" title="Skips"><i data-i="skip"></i><span id="ps">0</span></span>
+<button class="ib" onclick="acct()" id="nm" aria-label="Account"></button>
+<select class="ib" id="lg" onchange="setL(this.value)" aria-label="Language"></select><button class="ib" onclick="theme()" aria-label="Toggle theme"><i data-i="moon"></i></button>
+</header>
+<main><nav id="nav"></nav><div id="app"></div></main>
+<footer class="mu">QuizMaster · Learn, play and earn. Your progress saves in this browser.</footer>
+<dialog id="am"><div id="ai" hidden></div><form id="af" onsubmit="auth(event)"><h2 id="at">Sign in</h2><p class="mu" id="ad"></p><label>Username<input id="au" required minlength="3" maxlength="16" autocomplete="username"></label><label>Password<input id="ap" type="password" required minlength="6" autocomplete="current-password"></label><p id="ae" role="alert" style="color:var(--bad);margin:0 0 10px;font-weight:700"></p><div class="row"><button class="btn" id="as">Sign in</button><button type="button" class="btn alt" onclick="$('#am').close()">Cancel</button></div><p class="mu"><span id="aq"></span> <button type="button" class="lnk" id="ax" onclick="amode()"></button></p></form></dialog>
+<dialog id="cm"><h2>Leave this quiz?</h2><p class="mu">Your answers in this round will be lost. Tips and skips you already used stay spent.</p><div class="row"><button class="btn" onclick="$('#cm').close();go('home')">Leave quiz</button><button class="btn alt" onclick="$('#cm').close()">Keep playing</button></div></dialog>
+<div id="toast" role="status"></div>
+<script>
+const S=[
+{id:'m5',g:5,i:'🧮',n:'Math Basics',t:'Fractions: simplify by dividing top and bottom by the same number (12/16 → 3/4).\nDecimals: 0.75 = 75/100 = 3/4.\nPerimeter = add all sides. Area = length × width.\nTip: split big products, 15 × 6 = 10×6 + 5×6.',q:[
+["15 × 6 = ?",["80","90","100","75"],1,"15 × 6 = 60 + 30 = 90."],
+["What is ½ of 84?",["42","44","40","38"],0,"Halving 84 gives 42."],
+["How many sides does a hexagon have?",["5","6","7","8"],1,"Hex- means six."],
+["Simplify 12/16.",["3/4","2/3","1/2","4/5"],0,"Divide both numbers by 4."],
+["Perimeter of a square with sides of 7 cm?",["28 cm","49 cm","21 cm","14 cm"],0,"4 × 7 = 28. (49 would be the area.)"],
+["0.75 as a fraction?",["1/4","3/4","1/2","2/5"],1,"75/100 simplifies to 3/4."]]},
+{id:'s5',g:5,i:'🌱',n:'Nature Science',t:'Photosynthesis: sunlight + water + CO₂ → glucose + oxygen, using chlorophyll.\nMatter: solid (fixed shape), liquid (takes the container’s shape), gas (fills the space).\nFood chain: producers → herbivores → predators.\nGravity pulls objects toward Earth’s center.',q:[
+["Which planet is the Red Planet?",["Venus","Mars","Jupiter","Saturn"],1,"Iron oxide (rust) on Mars gives it a red color."],
+["How do plants make their food?",["Respiration","Photosynthesis","Digestion","Evaporation"],1,"They turn light, water and CO₂ into glucose."],
+["Water vapor is which state of matter?",["Solid","Liquid","Gas","Plasma"],2,"Vapor is water in gas form."],
+["What pulls objects toward Earth?",["Magnetism","Friction","Gravity","Electricity"],2,"Gravity attracts masses to each other."],
+["Main source of energy for Earth?",["The Moon","The Sun","Volcanoes","Wind"],1,"Almost all surface energy comes from sunlight."],
+["Which organ pumps blood around the body?",["Lungs","Brain","Heart","Stomach"],2,"The heart is a muscular pump."]]},
+{id:'l5',g:5,i:'📖',n:'Language & Grammar',t:'Noun: person, place, thing or idea (happiness).\nVerb: an action (run). Adjective: describes a noun (shiny key).\nAntonym = opposite meaning. Synonym = similar meaning.\nEnd statements with a period, questions with ?, strong feelings with !',q:[
+["Which word is a noun?",["Quickly","Run","Happiness","Blue"],2,"Happiness is an idea, so it is a noun."],
+["Antonym of “ancient”?",["Old","Modern","Historic","Aged"],1,"Ancient means very old; modern is the opposite."],
+["Which sentence is in the past tense?",["I walk home.","I will walk home.","I walked home.","I am walking home."],2,"“Walked” is the past form."],
+["Find the adjective: “The shiny key unlocked the door.”",["key","shiny","unlocked","door"],1,"“Shiny” describes the key."],
+["What ends an exclamatory sentence?",["Period","Question mark","Exclamation point","Comma"],2,"Exclamations use !"],
+["Synonym of “happy”?",["Sad","Joyful","Angry","Tired"],1,"Joyful means almost the same."]]},
+{id:'a7',g:7,i:'➗',n:'Algebra I',t:'Sign rules: (−)×(−) = +, (−)×(+) = −.\nSolve equations by undoing operations in reverse order.\n3x − 5 = 10 → 3x = 15 → x = 5.\nCombine like terms: 4a − 2a = 2a.\nPercent: 20% of 150 = 0.20 × 150 = 30.',q:[
+["Solve: 2x + 8 = 20",["x = 4","x = 6","x = 8","x = 10"],1,"2x = 12, so x = 6."],
+["(−5) × (−4) = ?",["−20","20","−9","9"],1,"Two negatives make a positive."],
+["√81 = ?",["7","8","9","10"],2,"9 × 9 = 81."],
+["If y = 3x − 2, what is y when x = 5?",["13","15","11","17"],0,"3·5 − 2 = 13."],
+["Simplify: 4a + 3b − 2a + b",["2a + 4b","6a + 4b","2a + 2b","4a + 4b"],0,"a-terms: 2a. b-terms: 4b."],
+["Solve: x/4 + 3 = 9",["24","12","16","36"],0,"x/4 = 6, so x = 24."]]},
+{id:'h7',g:7,i:'🏛️',n:'World History',t:'Feudalism: king → nobles → knights → peasants/serfs, all tied to land.\nBlack Death (1347): plague spread by fleas on rats, killing roughly a third of Europe.\nRome: Julius Caesar led the Republic before it became an Empire.\nEgypt grew along the Nile and built the pyramids.',q:[
+["Where was the Roman Empire centered?",["Greece","Italy","France","Spain"],1,"Rome is in Italy."],
+["Who wrote the US Declaration of Independence?",["George Washington","Thomas Jefferson","Benjamin Franklin","John Adams"],1,"Jefferson was the main author in 1776."],
+["Who built the Pyramids of Giza?",["Romans","Greeks","Egyptians","Mayans"],2,"Ancient Egyptians, about 4,500 years ago."],
+["What reached Europe in 1347 and killed millions?",["Black Death","World War I","The Crusades","The Renaissance"],0,"Plague arrived by ship from the Black Sea."],
+["Julius Caesar ruled which state?",["Ottoman","Roman","British","Mongol"],1,"He was a Roman general and dictator."],
+["Who sat at the bottom of the feudal system?",["Knights","Nobles","Serfs","Kings"],2,"Serfs worked the land for their lord."]]},
+{id:'b7',g:7,i:'🧬',n:'Biology & Body',t:'Nucleus holds DNA. Mitochondria release energy. The membrane controls what enters.\nRed blood cells carry oxygen; white blood cells fight infection.\nSystems: circulatory (heart), respiratory (lungs), digestive (stomach, intestines).',q:[
+["Which organelle is the cell’s powerhouse?",["Nucleus","Mitochondria","Ribosome","Golgi"],1,"Mitochondria make usable energy (ATP)."],
+["What carries oxygen in blood?",["White cells","Red cells","Platelets","Plasma"],1,"Hemoglobin in red cells binds oxygen."],
+["Joint type in the shoulder?",["Hinge","Ball and socket","Pivot","Fixed"],1,"It allows rotation in many directions."],
+["Which molecule carries hereditary information?",["RNA","DNA","ATP","Glucose"],1,"Genes are made of DNA."],
+["Main job of white blood cells?",["Carry oxygen","Fight infection","Clot blood","Digest food"],1,"They are part of the immune system."],
+["Which system swaps O₂ and CO₂?",["Digestive","Respiratory","Skeletal","Nervous"],1,"Gas exchange happens in the lungs."]]},
+{id:'m9',g:9,i:'📐',n:'Advanced Math',t:'Pythagoras: a² + b² = c² (3-4-5 triangle).\nQuadratic formula: x = [−b ± √(b² − 4ac)] / 2a.\nSOH-CAH-TOA: sin = opp/hyp, cos = adj/hyp, tan = opp/adj.\nLine y = mx + b: m is the slope.\nlog₁₀(1000) = 3 because 10³ = 1000.',q:[
+["Hypotenuse of a right triangle with legs 6 and 8?",["9","10","12","14"],1,"36 + 64 = 100, √100 = 10."],
+["Solve: x² − 16 = 0",["x = 4","x = ±4","x = 16","x = 8"],1,"Both 4 and −4 square to 16."],
+["Derivative of x²?",["x","2x","x³","2"],1,"Power rule: bring down the 2."],
+["log₁₀(1000) = ?",["2","3","10","100"],1,"10³ = 1000."],
+["sin(90°) = ?",["0","0.5","1","undefined"],2,"At 90° the opposite side equals the hypotenuse."],
+["Slope of y = 4x − 7?",["4","−7","7","1/4"],0,"In y = mx + b, m = 4."]]},
+{id:'p9',g:9,i:'⚗️',n:'Physics & Chemistry',t:'Newton 1: inertia. Newton 2: F = m × a. Newton 3: every action has an equal, opposite reaction.\nAtoms: protons (+) and neutrons in the nucleus, electrons (−) in shells.\npH 7 is neutral; below is acidic, above is basic.\nLight travels ≈ 300,000 km/s.',q:[
+["Newton’s Second Law?",["E = mc²","F = m·a","V = I·R","P = F/A"],1,"Force equals mass times acceleration."],
+["Chemical symbol for gold?",["Ag","Au","Fe","Go"],1,"From Latin aurum."],
+["Which particles sit in the nucleus?",["Protons & electrons","Protons & neutrons","Neutrons & electrons","Electrons only"],1,"Electrons orbit outside."],
+["pH of a neutral solution?",["0","7","14","1"],1,"Pure water is about 7."],
+["Speed of light in a vacuum?",["300,000 km/s","150,000 km/s","1,000,000 km/s","30,000 km/s"],0,"About 3 × 10⁸ m/s."],
+["SI unit of force?",["Joule","Watt","Newton","Pascal"],2,"1 N = 1 kg·m/s²."]]},
+{id:'g9',g:9,i:'🌍',n:'World & Tech',t:'Capitals often surprise: Australia → Canberra, Brazil → Brasília, Canada → Ottawa.\nAir is ~78% nitrogen, ~21% oxygen.\nBinary: 1, 10, 11, 100, 101 = 1, 2, 3, 4, 5.\nCPU = the chip that runs instructions; Python was created by Guido van Rossum.',q:[
+["Capital of Australia?",["Sydney","Melbourne","Canberra","Brisbane"],2,"Canberra was built as a compromise capital."],
+["Which gas is ~78% of the atmosphere?",["Oxygen","Nitrogen","CO₂","Hydrogen"],1,"Oxygen is only about 21%."],
+["Who painted the Mona Lisa?",["Van Gogh","Leonardo da Vinci","Picasso","Michelangelo"],1,"Painted in the early 1500s."],
+["Binary for decimal 5?",["100","101","110","111"],1,"4 + 1 = 101."],
+["Who created Python?",["Bill Gates","Guido van Rossum","Linus Torvalds","Steve Jobs"],1,"First released in 1991."],
+["What does CPU stand for?",["Central Processing Unit","Computer Power Unit","Core Program Utility","Central Printing Unit"],0,"It executes a computer’s instructions."]]},
+{id:'geo5',g:5,i:'🗺️',n:'Geography Explorer',t:'Earth has 7 continents and 5 oceans; the Pacific is the largest.\nThe Equator splits the globe into northern and southern hemispheres.\nCapitals: Brazil → Brasília, Egypt → Cairo, Japan → Tokyo.\nA map’s scale shows how real distance shrinks on paper.',q:[
+["Largest ocean on Earth?",["Atlantic","Indian","Pacific","Arctic"],2,"The Pacific covers about a third of the planet."],
+["How many continents are there?",["5","6","7","8"],2,"Asia, Africa, North America, South America, Antarctica, Europe and Australia."],
+["Capital of Brazil?",["Rio de Janeiro","São Paulo","Brasília","Salvador"],2,"Brasília became the capital in 1960."],
+["Which line splits north from south?",["Prime Meridian","Equator","Tropic of Cancer","Date Line"],1,"The Equator is 0° latitude."],
+["Which continent is Egypt in?",["Asia","Europe","Africa","Australia"],2,"Egypt is in northeast Africa."]]},
+{id:'r7',g:7,i:'📏',n:'Geometry & Ratios',t:'Angles in a triangle add up to 180°.\nCircle area = πr². Triangle area = ½ × base × height.\nSupplementary angles add to 180°.\nRatio 3:5 of 40: 40 ÷ 8 = 5, so the parts are 15 and 25.',q:[
+["Angles in a triangle add up to?",["90°","180°","270°","360°"],1,"Always 180°."],
+["Area of a triangle with base 10 and height 6?",["60","30","16","32"],1,"½ × 10 × 6 = 30."],
+["Supplement of a 65° angle?",["25°","115°","125°","295°"],1,"180 − 65 = 115."],
+["Split 40 in the ratio 3:5. The smaller part is?",["12","15","20","25"],1,"40 ÷ 8 = 5, and 3 × 5 = 15."],
+["Area of a circle?",["2πr","πr²","πd²","r²/2"],1,"Area = π × radius squared."]]},
+{id:'c7',g:7,i:'💻',n:'Computers & Coding',t:'A variable stores a value (score = 10).\nA loop repeats steps; an if-statement makes a choice.\nAn algorithm is a step-by-step recipe for solving a problem.\nA bit is 0 or 1; 8 bits make a byte.\nHTML structures web pages, CSS styles them.',q:[
+["What does a variable do?",["Repeats code","Stores a value","Draws a page","Deletes files"],1,"It names a place in memory for data."],
+["How many bits make a byte?",["4","8","16","32"],1,"1 byte = 8 bits."],
+["Which language structures a web page?",["CSS","HTML","SQL","Python"],1,"HTML marks up headings, links and more."],
+["What repeats steps until a condition changes?",["Loop","Comment","Variable","Bug"],0,"Loops (for, while) repeat code."],
+["An algorithm is…",["A virus","Step-by-step instructions","A monitor","A password"],1,"A clear recipe for solving a problem."]]},
+{id:'en9',g:9,i:'✍️',n:'Literature & Writing',t:'Simile compares with like or as; metaphor says one thing is another.\nThesis statement: your main claim in one clear sentence.\nProtagonist = main character; antagonist opposes them.\nTheme: the big idea a story explores, such as courage or loss.',q:[
+["Who wrote Romeo and Juliet?",["Dickens","Shakespeare","Austen","Twain"],1,"Shakespeare wrote it in the 1590s."],
+["“Time is a thief” is a…",["Simile","Metaphor","Alliteration","Hyperbole"],1,"It says time IS a thief, with no like or as."],
+["“Brave as a lion” is a…",["Simile","Metaphor","Idiom","Pun"],0,"It compares using “as”."],
+["The protagonist is…",["The villain","The main character","The setting","The title"],1,"The story follows them."],
+["A thesis statement is…",["A question","The main claim of an essay","A quote","A title"],1,"Everything in the essay supports it."]]},
+{id:'h5',g:5,i:'',n:'Ancient Civilizations',t:'Egypt grew along the Nile; pharaohs ruled and pyramids were tombs.\nMesopotamia, the “land between rivers”, gave us writing called cuneiform.\nAncient Greece gave us democracy and the Olympic Games.\nRome built roads, aqueducts and the Colosseum.',q:[
+["Which river was the lifeline of ancient Egypt?",["Nile","Amazon","Danube","Ganges"],0,"Yearly floods made the land fertile."],
+["Egyptian pyramids were mainly built as…",["Palaces","Tombs for pharaohs","Markets","Schools"],1,"They protected the pharaoh’s body and treasures."],
+["Where did the first Olympic Games take place?",["Rome","Athens","Olympia","Sparta"],2,"They began in Olympia, Greece, around 776 BCE."],
+["Which people created cuneiform writing?",["Egyptians","Sumerians","Romans","Aztecs"],1,"Sumerians pressed wedge shapes into clay."],
+["What did Roman aqueducts carry?",["Soldiers","Water","Grain","Letters"],1,"They brought fresh water to cities."]]},
+{id:'e7',g:7,i:'',n:'Earth & Space',t:'Earth orbits the Sun in about 365 days and spins once every 24 hours.\nSeasons come from Earth’s 23.5° tilt, not its distance from the Sun.\nThe Moon’s gravity causes ocean tides.\nEarth’s layers: crust, mantle, outer core, inner core.',q:[
+["What causes the seasons?",["Distance from the Sun","Earth’s tilt","The Moon","Solar storms"],1,"The tilt changes how directly sunlight hits each hemisphere."],
+["Which layer of Earth is the thickest?",["Crust","Mantle","Outer core","Inner core"],1,"The mantle is most of Earth’s volume."],
+["Which planet is famous for its bright rings?",["Mars","Saturn","Mercury","Venus"],1,"Saturn’s rings are mostly ice and rock."],
+["What is the closest star to Earth?",["Sirius","Polaris","The Sun","Alpha Centauri"],2,"The Sun is only about 150 million km away."],
+["What mainly causes ocean tides?",["Wind","The Moon’s gravity","Earthquakes","Rain"],1,"The Moon pulls the water toward it."]]},
+{id:'ch7',g:7,i:'',n:'Chemistry Basics',t:'Everything is made of atoms; atoms join into molecules (H₂O).\nElements are on the periodic table; compounds combine elements.\nPhysical change: shape or state changes. Chemical change: a new substance forms.\nAcids taste sour, bases feel slippery; pH tells which.',q:[
+["Chemical formula for water?",["CO₂","H₂O","O₂","NaCl"],1,"Two hydrogen atoms and one oxygen atom."],
+["Which is a chemical change?",["Ice melting","Paper burning","Sugar dissolving","Cutting wood"],1,"Burning makes new substances such as ash and gases."],
+["Chemical symbol for sodium?",["S","So","Na","Sd"],2,"Na comes from the Latin natrium."],
+["Table salt is a…",["Element","Compound","Mixture of gases","Metal"],1,"Sodium chloride joins two elements."],
+["Which gas do humans breathe out?",["Oxygen","Carbon dioxide","Helium","Hydrogen"],1,"We exhale carbon dioxide made by our cells."]]},
+{id:'st9',g:9,i:'',n:'Statistics & Probability',t:'Mean = sum ÷ count. Median = middle value. Mode = most common.\nProbability = favorable outcomes ÷ total outcomes.\nRange = largest − smallest.\nIndependent events multiply: P(A and B) = P(A) × P(B).',q:[
+["Mean of 2, 4, 6, 8?",["4","5","6","20"],1,"20 ÷ 4 = 5."],
+["Median of 3, 9, 5, 7, 1?",["3","5","7","9"],1,"Sorted: 1, 3, 5, 7, 9. The middle is 5."],
+["Chance of rolling a 4 on a fair die?",["1/4","1/6","1/3","1/2"],1,"One favorable outcome out of six."],
+["Two coin flips: chance of two heads?",["1/2","1/4","1/3","1/8"],1,"½ × ½ = ¼."],
+["Range of 12, 7, 20, 3?",["17","13","20","9"],0,"20 − 3 = 17."]]},
+{id:'w9',g:9,i:'',n:'Modern History',t:'WWI (1914–1918) began after Archduke Franz Ferdinand was assassinated.\nWWII (1939–1945) ended with the Allies defeating Germany and Japan.\nThe Cold War was a USA–USSR rivalry without direct war.\nThe Berlin Wall fell in 1989.',q:[
+["When did World War II end?",["1918","1939","1945","1960"],2,"1945, after Germany and then Japan surrendered."],
+["Which event sparked World War I?",["Fall of the Berlin Wall","Assassination of Archduke Franz Ferdinand","Pearl Harbor","Russian Revolution"],1,"It happened in Sarajevo in 1914."],
+["The Cold War was mainly between…",["UK and France","USA and USSR","China and Japan","Germany and Italy"],1,"Two superpowers competed without fighting directly."],
+["What fell in 1989, symbolizing the end of the Cold War?",["Great Wall","Berlin Wall","Iron Gate","Suez Canal"],1,"It had divided East and West Berlin."],
+["Which organization was founded in 1945 to promote peace?",["NATO","United Nations","European Union","WHO"],1,"The UN was created right after WWII."]]}];
+const ICO={coin:`<circle cx='12' cy='12' r='9'/><path d='M12 7v10M9.5 10c0-1.4 5-1.4 5 0s-5 2.2-5 4 5 1.4 5 0'/>`,bulb:`<path d='M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z'/>`,skip:`<path d='M5 5l9 7-9 7zM18 5v14'/>`,user:`<circle cx='12' cy='8' r='4'/><path d='M4 21c0-4 4-6 8-6s8 2 8 6'/>`,moon:`<path d='M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z'/>`,calc:`<rect x='5' y='3' width='14' height='18' rx='2'/><path d='M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2'/>`,leaf:`<path d='M5 19c0-9 5-14 15-14 0 10-5 15-14 15M5 19c3-5 6-8 10-10'/>`,book:`<path d='M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 19a2 2 0 012-2h13'/>`,times:`<path d='M5 5l14 14M19 5L5 19'/>`,landmark:`<path d='M3 10l9-6 9 6M5 10v8M9 10v8M15 10v8M19 10v8M3 21h18'/>`,dna:`<path d='M7 3c0 6 10 6 10 12s-10 6-10 6M17 3c0 6-10 6-10 12M8 8h8M8 16h8'/>`,sigma:`<path d='M18 5H6l7 7-7 7h12'/>`,flask:`<path d='M9 3h6M10 3v6L4.5 19a1.5 1.5 0 001.3 2h12.4a1.5 1.5 0 001.3-2L14 9V3M7.5 15h9'/>`,globe:`<circle cx='12' cy='12' r='9'/><path d='M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18'/>`,map:`<path d='M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14'/>`,ruler:`<path d='M3 17L17 3l4 4L7 21zM8 12l2 2M11 9l2 2M14 6l2 2'/>`,code:`<path d='M8 8l-5 4 5 4M16 8l5 4-5 4M14 5l-4 14'/>`,pen:`<path d='M4 20l1-4L17 4a2.1 2.1 0 013 3L8 19zM14 7l3 3'/>`};
+const IM={m5:'calc',s5:'leaf',l5:'book',a7:'times',h7:'landmark',b7:'dna',m9:'sigma',p9:'flask',g9:'globe',geo5:'map',r7:'ruler',c7:'code',en9:'pen',h5:'landmark',e7:'globe',ch7:'flask',st9:'sigma',w9:'book'};
+const ic=(k,s=22)=>`<svg width='${s}' height='${s}' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>${ICO[k]}</svg>`;
+document.querySelectorAll('[data-i]').forEach(e=>e.innerHTML=ic(e.dataset.i,17));
+const rn=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const NO=(v,f=x=>x)=>{const s=[v];while(s.length<4){const o=v+rn(-6,6);if(!s.includes(o)&&(o>=0)===(v>=0))s.push(o)}return s.map(f)};
+const mi=x=>String(x).replace('-','−');
+const GEN={
+m5:[()=>{const a=rn(6,19),b=rn(3,9),v=a*b;return[`${a} × ${b} = ?`,NO(v),0,`${a} × ${b} = ${v}.`]},
+()=>{const n=rn(10,60);return[`What is ½ of ${2*n}?`,NO(n),0,`Half of ${2*n} is ${n}.`]},
+()=>{const l=rn(3,12),w=rn(2,9),p=2*(l+w);return[`Perimeter of a ${l} cm by ${w} cm rectangle?`,NO(p,x=>x+' cm'),0,`2 × (${l} + ${w}) = ${p} cm.`]},
+()=>{const a=rn(100,500),b=rn(11,99);return[`${a} − ${b} = ?`,NO(a-b),0,`${a} − ${b} = ${a-b}.`]}],
+a7:[()=>{const x=rn(2,12),a=rn(2,9),b=rn(1,15);return[`Solve: ${a}x + ${b} = ${a*x+b}`,NO(x,v=>'x = '+v),0,`Subtract ${b}, then divide by ${a}: x = ${x}.`]},
+()=>{const a=rn(2,9),b=rn(2,9);return[`(−${a}) × ${b} = ?`,NO(-a*b,mi),0,'A negative times a positive is negative.']},
+()=>{const p=[10,20,25,50][rn(0,3)],n=rn(2,25)*20;return[`${p}% of ${n} = ?`,NO(n*p/100),0,`${p}% of ${n} is ${n*p/100}.`]},
+()=>{const m=rn(2,9),c=rn(1,9),x=rn(2,8);return[`If y = ${m}x − ${c}, what is y when x = ${x}?`,NO(m*x-c),0,`${m}·${x} − ${c} = ${m*x-c}.`]}],
+m9:[()=>{const t=[[3,4,5],[5,12,13],[8,15,17],[6,8,10],[9,12,15],[7,24,25]][rn(0,5)];return[`Right triangle with legs ${t[0]} and ${t[1]}. Hypotenuse?`,NO(t[2]),0,`${t[0]}² + ${t[1]}² = ${t[2]}².`]},
+()=>{const k=rn(2,12);return[`Solve: x² − ${k*k} = 0`,[`x = ±${k}`,`x = ${k}`,`x = ±${k*k}`,`x = ${k*2}`],0,`x² = ${k*k}, so x = ±${k}.`]},
+()=>{const n=rn(3,7);return[`Derivative of x^${n}?`,[`${n}x^${n-1}`,`x^${n-1}`,`${n-1}x^${n}`,`${n}x^${n}`],0,`Power rule: bring down ${n}, lower the exponent by 1.`]},
+()=>{const n=rn(2,6);return[`log₁₀(10^${n}) = ?`,NO(n),0,`10^${n} has exponent ${n}.`]},
+()=>{const m=rn(2,9),c=rn(1,9);return[`Slope of y = ${m}x − ${c}?`,NO(m),0,`In y = mx + b, m = ${m}.`]}],
+st9:[()=>{const m=rn(4,20),a=m+rn(-3,3),b=m+rn(-3,3),c=m+rn(-3,3),d=4*m-a-b-c;return[`Mean of ${a}, ${b}, ${c}, ${d}?`,NO(m),0,`The sum ${4*m} ÷ 4 = ${m}.`]},
+()=>{const s=sh(Array.from({length:30},(_,i)=>i+1)).slice(0,5),m=[...s].sort((x,y)=>x-y)[2];return[`Median of ${s.join(', ')}?`,NO(m),0,`Sorted, the middle value is ${m}.`]},
+()=>{const s=sh(Array.from({length:40},(_,i)=>i+1)).slice(0,4);return[`Range of ${s.join(', ')}?`,NO(Math.max(...s)-Math.min(...s)),0,'Largest minus smallest.']},
+()=>{const r=rn(2,8),b=r+rn(1,5),t=r+b;return[`A bag has ${r} red and ${b} blue marbles. Chance of drawing red?`,[`${r}/${t}`,`${b}/${t}`,`${r}/${b}`,`${t}/${r}`],0,`Red marbles ÷ all marbles = ${r}/${t}.`]}],
+r7:[()=>{const a=rn(30,90),b=rn(30,80);return[`Two angles of a triangle are ${a}° and ${b}°. The third angle?`,NO(180-a-b,x=>x+'°'),0,`180 − ${a} − ${b} = ${180-a-b}.`]},
+()=>{const b=rn(2,12)*2,h=rn(3,12);return[`Area of a triangle with base ${b} and height ${h}?`,NO(b*h/2),0,`½ × ${b} × ${h} = ${b*h/2}.`]},
+()=>{const a=rn(20,160);return[`Supplement of a ${a}° angle?`,NO(180-a,x=>x+'°'),0,`180 − ${a} = ${180-a}.`]},
+()=>{const x=rn(1,5),y=x+rn(1,4),k=rn(2,9);return[`Split ${(x+y)*k} in the ratio ${x}:${y}. The smaller part?`,NO(x*k),0,`${x+y} parts of ${k} each; the smaller part is ${x} × ${k}.`]}]};
+const X={
+s5:[['Which part of a plant absorbs water from the soil?',['Leaves','Roots','Flowers','Stem'],1,'Roots take in water and minerals.'],['Animals that eat only plants are called…',['Carnivores','Herbivores','Omnivores','Predators'],1,'Herbivores eat plants.'],['Which is the largest planet in our solar system?',['Earth','Saturn','Jupiter','Neptune'],2,'Jupiter is bigger than all other planets combined.'],['At what temperature does water freeze?',['0 °C','10 °C','50 °C','100 °C'],0,'Water freezes at 0 °C.']],
+l5:[['Which word is a verb?',['Table','Jump','Green','Softly'],1,'Jump is an action.'],['Plural of “child”?',['Childs','Childen','Children','Childrens'],2,'It is an irregular plural.'],['Which sentence is correct?',['She go to school.','She goes to school.','She going to school.','She gone to school.'],1,'Singular “she” takes “goes”.'],['Words that sound alike but are spelled differently are…',['Synonyms','Antonyms','Homophones','Prefixes'],2,'Like “see” and “sea”.']],
+geo5:[['Which is the longest river in South America?',['Nile','Amazon','Mississippi','Yangtze'],1,'The Amazon flows across Brazil and beyond.'],['Which is the largest hot desert?',['Gobi','Sahara','Kalahari','Atacama'],1,'The Sahara covers much of North Africa.'],['Which ocean lies between Africa and Australia?',['Atlantic','Indian','Pacific','Arctic'],1,'The Indian Ocean.'],['Mount Everest is in which mountain range?',['Andes','Alps','Himalayas','Rockies'],2,'The Himalayas, in Asia.']],
+h5:[['Which people built Machu Picchu?',['Aztecs','Incas','Maya','Romans'],1,'The Inca built it high in the Andes.'],['The Great Wall of China was built to…',['Grow crops','Defend against invaders','Hold water','Mark a market'],1,'It protected China’s borders.'],['Which Greek city was famous for its warriors?',['Athens','Sparta','Corinth','Delphi'],1,'Spartan boys trained for war from childhood.'],['What was the Colosseum?',['A Roman arena','An Egyptian temple','A Greek school','A Viking ship'],0,'Romans watched games there.']],
+h7:[['The printing press, invented around 1440, helped spread…',['Books and ideas','Plague','Gold','Spices'],0,'Gutenberg’s press made books cheaper.'],['The Renaissance began in which country?',['Italy','England','Spain','Germany'],0,'It began in Italian cities like Florence.'],['Who sailed across the Atlantic in 1492 for Spain?',['Marco Polo','Christopher Columbus','Magellan','Vasco da Gama'],1,'Columbus reached the Caribbean.'],['Medieval castles were built mainly for…',['Farming','Defense','Trade fairs','Schools'],1,'Thick walls protected lords and people.']],
+b7:[['Which organelle makes food in plant cells?',['Mitochondria','Chloroplast','Nucleus','Vacuole'],1,'Chloroplasts carry out photosynthesis.'],['Which part of a cell controls what goes in and out?',['Cell wall','Membrane','Cytoplasm','Ribosome'],1,'The membrane is a selective barrier.'],['How many chambers does the human heart have?',['2','3','4','6'],2,'Two atria and two ventricles.'],['Which organs filter blood and make urine?',['Liver','Kidneys','Pancreas','Spleen'],1,'The kidneys clean the blood.']],
+c7:[['What is a bug in programming?',['A virus','An error in code','A keyboard','A website'],1,'Fixing bugs is called debugging.'],['Which symbol starts a comment in Python?',['//','#','<!--','**'],1,'Python comments begin with #.'],['A loop that never stops is called…',['An infinite loop','A new file','A fast computer','A syntax color'],0,'It repeats forever.'],['What does “www” stand for?',['World Wide Web','Wide Web Window','Web World Wire','Wireless World Web'],0,'It is the system of linked web pages.']],
+e7:[['Which planet is closest to the Sun?',['Venus','Mercury','Mars','Earth'],1,'Mercury orbits closest.'],['A light-year measures…',['Time','Distance','Speed','Brightness'],1,'It is the distance light travels in a year.'],['Rock formed from cooled magma or lava is…',['Sedimentary','Igneous','Metamorphic','Fossil'],1,'Igneous means “from fire”.'],['The ozone layer sits in which atmospheric layer?',['Troposphere','Stratosphere','Exosphere','Thermosphere'],1,'Ozone is in the stratosphere.']],
+ch7:[['Chemical symbol for iron?',['Ir','Fe','In','I'],1,'Fe comes from Latin ferrum.'],['Which state of matter has a fixed volume but no fixed shape?',['Solid','Liquid','Gas','Plasma'],1,'Liquids take the shape of their container.'],['Which of these is a noble gas?',['Oxygen','Neon','Chlorine','Nitrogen'],1,'Noble gases barely react.'],['Salt dissolved in water forms a…',['Solution','Compound','Element','Metal'],0,'A solution is an evenly mixed blend.']],
+p9:[['What is the unit of electrical resistance?',['Volt','Ohm','Ampere','Watt'],1,'Resistance is measured in ohms.'],['Gravity on Earth accelerates objects at about…',['9.8 m/s²','1.6 m/s²','98 m/s²','3.0 m/s²'],0,'About 9.8 m/s².'],['Which particle has a negative charge?',['Proton','Neutron','Electron','Nucleus'],2,'Electrons are negative.'],['A moving object has which kind of energy?',['Potential','Kinetic','Chemical only','Nuclear'],1,'Kinetic energy = ½mv².']],
+g9:[['Which ocean is the deepest?',['Atlantic','Indian','Pacific','Arctic'],2,'The Mariana Trench is in the Pacific.'],['What does HTTP stand for?',['HyperText Transfer Protocol','High Transfer Text Process','Hyper Terminal Tool Page','Home Text Transfer Plan'],0,'The rules browsers use to fetch pages.'],['What is the smallest prime number?',['0','1','2','3'],2,'2 is the smallest prime.'],['Marrakech is a city in which country?',['Egypt','Morocco','Tunisia','Algeria'],1,'Marrakech is in Morocco.']],
+en9:[['A word that imitates a sound, like “buzz”, is…',['Onomatopoeia','Irony','Alliteration','Oxymoron'],0,'The word sounds like its meaning.'],['Who wrote “1984”?',['George Orwell','Aldous Huxley','Mark Twain','H. G. Wells'],0,'Orwell published it in 1949.'],['“The wind whispered” is an example of…',['Personification','Hyperbole','Simile','Rhyme'],0,'The wind is given a human action.'],['The turning point of a story is the…',['Exposition','Climax','Resolution','Setting'],1,'The climax is the story’s high point.']],
+w9:[['Who was the first person to walk on the Moon?',['Buzz Aldrin','Neil Armstrong','Yuri Gagarin','John Glenn'],1,'Neil Armstrong, in 1969.'],['Which war was fought between the northern and southern US states?',['Revolutionary War','Civil War','Cold War','War of 1812'],1,'It lasted from 1861 to 1865.'],['What was the 1930s global economic crisis called?',['Great Depression','Gold Rush','Dust Age','Oil Crisis'],0,'It followed the 1929 stock market crash.'],['Which empire’s ruler was called a “tsar”?',['Ottoman','Russian','Roman','Mongol'],1,'Tsar was the Russian title.']]};
+function roundQs(s){const id=s.id,all=s.q.concat(X[id]||[]),g=GEN[id],ng=g?3:0;P.seen=P.seen||{};let sn=P.seen[id]||[],fr=all.filter(q=>!sn.includes(q[0]));if(fr.length<5-ng){sn=[];fr=all}const pk=sh(fr).slice(0,5-ng);P.seen[id]=sn.concat(pk.map(q=>q[0]));save();return sh((g?sh(g).slice(0,3).map(f=>f()):[]).concat(pk))}
+const PT={5:5,7:10,9:15},GC={5:'var(--g5)',7:'var(--g7)',9:'var(--g9)'};
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+let P={name:'Player',pts:0,tips:2,best:{},played:0},V='home',G=0,Q=null;
+try{P=Object.assign(P,JSON.parse(localStorage.getItem('qm2')||'{}'))}catch(e){}
+function save(){P.skips=P.skips||0;try{if(U){const A=accs();if(A[U]){A[U].data=P;localStorage.setItem('qm_acc',JSON.stringify(A))}}else localStorage.setItem('qm2',JSON.stringify(P))}catch(e){}$('#pp').textContent=P.pts;$('#pt').textContent=P.tips;$('#ps').textContent=P.skips;$('#nm').innerHTML=ic('user',16)+' '+(U?esc(P.name):'Sign in')}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2200)}
+function theme(){const r=document.documentElement,d=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=d?'light':'dark'}
+function rename(){const n=prompt('Your name:',P.name);if(n&&n.trim()){P.name=n.trim().slice(0,16);save()}}
+function go(v){V=v;draw()}
+function setG(g){G=g;draw()}
+function start(id){const s=S.find(x=>x.id===id),R5=roundQs(s);Q={s,i:0,sc:0,sel:null,gone:[],miss:[],qs:R5.map(([q,o,a,w])=>{const m=sh(o.map((t,i)=>[t,i===a]));return{q,w,o:m.map(x=>x[0]),a:m.findIndex(x=>x[1])}})};if(L!=='en')fetchT(Q.qs.flatMap(q=>[q.q,q.w,...q.o]).concat(['Correct!','Not quite.']));go('quiz')}
+function pick(i){if(Q.gone.includes(i))return;Q.sel=i;draw()}
+function tip(){if(Q.gone.length)return;if(P.tips<1)return toast('No tips left. Buy more in the shop.');const q=Q.qs[Q.i];P.tips--;Q.gone=sh(q.o.map((_,i)=>i).filter(i=>i!==q.a)).slice(0,2);if(Q.gone.includes(Q.sel))Q.sel=null;save();draw()}
+function next(){if(Q.sel===null)return;const q0=Q.qs[Q.i];if(!Q.sk){Q.sel===q0.a?Q.sc++:Q.miss.push(Object.assign({},q0,{p:q0.o[Q.sel]}))}if(Q.i<Q.qs.length-1){Q.i++;Q.sel=null;Q.gone=[];Q.sk=0;draw();scrollTo(0,0);return}
+const n=Q.qs.length,b=Q.sc===n?10:0;Q.pts=Q.sc*PT[Q.s.g]+b;Q.bonus=b;Q.nb=Q.sc>(P.best[Q.s.id]||0);P.pts+=Q.pts;P.played++;P.best[Q.s.id]=Math.max(Q.sc,P.best[Q.s.id]||0);save();go('result')}
+function quit(){$('#cm').showModal()}
+function buy(n,c,k){if(P.pts<c)return toast('Not enough points yet. Finish a quiz first.');P.pts-=c;if(k==='skip')P.skips+=n;else P.tips+=n;save();toast('Bought '+n+' '+(k==='skip'?'skip':'tip')+(n>1?'s':''));if(V==='shop')draw()}
+function skip(){if(P.skips<1)return toast('No skips left. Buy more in the shop.');const q=Q.qs[Q.i];P.skips--;Q.sel=q.a;Q.sc++;Q.sk=1;save();next()}
+function draw(){
+$('#nav').innerHTML=['home','study','shop'].map(v=>`<button class="tab ${V===v?'on':''}" onclick="go('${v}')">${{home:'Quizzes',study:'Study',shop:'Shop'}[v]}</button>`).join('');
+$('#nav').style.display=(V==='quiz'||V==='result')?'none':'flex';
+const chips=`<div class="chips">${[0,5,7,9].map(g=>`<button class="chip ${G===g?'on':''}" onclick="setG(${g})">${g?g+'th grade':'All grades'}</button>`).join('')}</div>`;
+const list=S.filter(s=>!G||s.g===G);let h='';
+if(V==='home'){h=`<div class="hero"><h1>Learn it. Quiz it. Own it.</h1><p>Short quizzes and study notes for 5th, 7th and 9th grade. Earn points, spend them on tips and skips, and master every subject.</p><div class="stats"><div class="st"><b>${S.length}</b><small>subjects</small></div><div class="st"><b>${S.reduce((a,s)=>a+s.q.length+(X[s.id]||[]).length,0)}+</b><small>questions, math is endless</small></div><div class="st"><b>${Object.values(P.best).filter(v=>v>=5).length}/${S.length}</b><small>mastered</small></div><div class="st"><b>${P.played}</b><small>rounds played</small></div></div><div class="row" style="margin-top:18px"><button class="btn" onclick="start(S[Math.floor(Math.random()*S.length)].id)">${ic('skip',16)} Surprise me</button>${U?'':`<button class="btn" style="background:rgba(255,255,255,.18);color:#fff" onclick="acct()">Sign in to save progress</button>`}</div></div>${chips}<div class="grid">${list.map(s=>`<div class="card" style="--c:${GC[s.g]}"><span class="em">${ic(IM[s.id],26)}</span><h3>${s.n}</h3><span class="badge">${s.g}th grade · ${PT[s.g]} pts per answer</span><div class="dots">${[0,1,2,3,4].map(i=>`<i class="${i<(P.best[s.id]||0)?'f':''}"></i>`).join('')}</div><span class="mu">Best score ${P.best[s.id]||0} of 5</span><div class="row"><button class="btn" onclick="start('${s.id}')">Start quiz</button><button class="btn alt" onclick="G=${s.g};go('study')">Review notes</button></div></div>`).join('')}</div>`}
+if(V==='study'){h=`<h2>Study notes</h2><p class="mu">Read the key ideas, then test yourself.</p>${chips}<div class="grid">${list.map(s=>`<div class="card" style="--c:${GC[s.g]}"><span class="em">${ic(IM[s.id],26)}</span><h3>${s.n}</h3><div class="tut">${esc(s.t)}</div><div class="row"><button class="btn" onclick="start('${s.id}')">Quiz me</button></div></div>`).join('')}</div>`}
+if(V==='shop'){h=`<h2>Shop</h2><p class="mu">You have ${P.pts} points.</p>${[['tip','Tips','A tip removes two wrong answers.',[[1,50,'1 tip'],[5,240,'5 tips · save 10'],[10,450,'10 tips · save 50']]],['skip','Skips','A skip passes a question and counts it as a correct answer.',[[1,200,'1 skip'],[5,850,'5 skips · save 150'],[10,1300,'10 skips · save 700']]]].map(([k,t,d,R])=>`<h3 style="margin:22px 0 4px">${t}</h3><p class="mu" style="margin:0 0 12px">${d}</p><div class="grid">${R.map(([n,c,l])=>`<div class="card" style="--c:${k==='tip'?'var(--hl)':'var(--ac)'}"><span class="em">${ic(k==='tip'?'bulb':'skip',26)}</span><h3>${l}</h3><b>${c} points</b><div class="row"><button class="btn" ${P.pts<c?'disabled':''} onclick="buy(${n},${c},'${k}')">Buy</button></div></div>`).join('')}</div>`).join('')}`}
+if(V==='quiz'){const q=Q.qs[Q.i],d=Q.sel!==null;h=`<div class="q"><div style="display:flex;justify-content:space-between;gap:8px"><button class="btn alt" onclick="quit()">Exit</button><span class="mu">${Q.s.n} · ${Q.i+1} of ${Q.qs.length}</span></div><div class="bar"><i style="width:${Q.i/Q.qs.length*100}%"></i></div><h2 style="margin-bottom:18px">${esc(q.q)}</h2>${q.o.map((t,i)=>`<button class="opt ${Q.gone.includes(i)?'gone':''} ${i===Q.sel?'sel':''}" ${Q.gone.includes(i)?'disabled':''} onclick="pick(${i})"><b>${'ABCD'[i]}</b>${esc(t)}</button>`).join('')}<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn alt" ${Q.gone.length||P.tips<1?'disabled':''} onclick="tip()">${ic('bulb',16)} Use tip (${P.tips})</button><button class="btn alt" ${P.skips<1?'disabled':''} onclick="skip()">${ic('skip',16)} Skip (${P.skips})</button></span><button class="btn" ${d?'':'disabled'} onclick="next()">${Q.i<Q.qs.length-1?'Confirm answer':'Confirm and finish'}</button></div></div>`}
+if(V==='result'){const n=Q.qs.length;h=`<div class="q" style="text-align:center"><div class="ring" style="--p:${Q.sc/n*100}"><div>${Q.sc}/${n}</div></div><h2>${Q.sc===n?'Perfect round!':Q.sc>=3?'Nice work!':'Keep practicing'}</h2><p>+${Q.pts} points${Q.bonus?' (includes a +10 perfect bonus)':''}${Q.nb?' · new personal best':''}</p>${Q.miss.length?`<div style="text-align:left"><h3>What you got wrong</h3>${Q.miss.map(m=>`<div class="why"><b>${esc(m.q)}</b><br>You chose: ${esc(m.p)}<br>Correct answer: ${esc(m.o[m.a])}<br>${esc(m.w)}</div>`).join('')}</div>`:''}<div class="row" style="justify-content:center"><button class="btn" onclick="start('${Q.s.id}')">Play again</button><button class="btn alt" onclick="go('home')">All quizzes</button></div></div>`}
+$('#app').innerHTML=h;tl()}
+const defP=()=>({name:'Player',pts:0,tips:2,best:{},played:0});
+function accs(){try{return JSON.parse(localStorage.getItem('qm_acc')||'{}')}catch(e){return{}}}
+let U=null,AM='in';
+try{U=localStorage.getItem('qm_cur');const a=accs()[U];if(a)P=Object.assign(defP(),a.data);else U=null}catch(e){U=null}
+async function hash(pw,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveBits']);const b=await crypto.subtle.deriveBits({name:'PBKDF2',salt:Uint8Array.from(salt),iterations:150000,hash:'SHA-256'},k,256);return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function acct(){if(U){const m=Object.values(P.best).filter(v=>v>=5).length;$('#ai').innerHTML=`<div class="av">${esc(P.name[0].toUpperCase())}</div><h2 style="text-align:center">${esc(P.name)}</h2><p class="mu" style="text-align:center;margin:4px 0 0">Signed in. Progress saves on this device.</p><div class="sg"><div><b>${P.pts}</b>Points</div><div><b>${P.played}</b>Rounds played</div><div><b>${P.tips}</b>Tips</div><div><b>${P.skips||0}</b>Skips</div><div><b>${m}/${S.length}</b>Subjects mastered</div><div><b>${Object.keys(P.best).length}</b>Subjects tried</div></div><div class="row"><button class="btn" onclick="logout()">Sign out</button><button class="btn alt" onclick="$('#am').close()">Close</button></div>`;$('#ai').hidden=false;$('#af').hidden=true;$('#am').showModal();tl();return}AM='in';$('#ai').hidden=true;$('#af').hidden=false;amode(1)}
+function amode(keep){if(!keep)AM=AM==='in'?'up':'in';const up=AM==='up';$('#at').textContent=up?'Create account':'Sign in';$('#as').textContent=up?'Create account':'Sign in';$('#aq').textContent=up?'Already have an account?':'New here?';$('#ax').textContent=up?'Sign in':'Create account';$('#ad').textContent=up?'Keep your points and tips on this device. Your current progress carries over.':'Welcome back. Pick up where you left off.';$('#ae').textContent='';$('#ap').autocomplete=up?'new-password':'current-password';if(!$('#am').open)$('#am').showModal();tl()}
+async function auth(ev){ev.preventDefault();const u=$('#au').value.trim(),pw=$('#ap').value,k=u.toLowerCase(),A=accs(),err=m=>{$('#ae').textContent=m};
+try{if(AM==='up'){if(!/^[\w.-]{3,16}$/.test(u))return err('Use 3 to 16 letters, numbers, dots or dashes.');if(A[k])return err('That username is taken.');const s=Array.from(crypto.getRandomValues(new Uint8Array(16)));P.name=u;A[k]={s,h:await hash(pw,s),data:P};localStorage.setItem('qm_acc',JSON.stringify(A));U=k}
+else{const a=A[k];if(!a||a.h!==await hash(pw,a.s))return err('Wrong username or password.');U=k;P=Object.assign(defP(),a.data)}
+localStorage.setItem('qm_cur',U)}catch(e){U=null;return err('Sign-in needs a secure browser tab with storage enabled.')}
+$('#am').close();$('#ap').value='';save();draw();toast('Welcome, '+P.name+'!')}
+function logout(){$('#am').close();try{localStorage.removeItem('qm_cur')}catch(e){}U=null;try{P=Object.assign(defP(),JSON.parse(localStorage.getItem('qm2')||'{}'))}catch(e){P=defP()}save();go('home');toast('Signed out')}
+const LN={en:'English',pt:'Português',es:'Español',fr:'Français',de:'Deutsch',it:'Italiano',zh:'中文',ja:'日本語'};
+let L=null,TC={},busy=false;
+try{L=localStorage.getItem('qm_l')}catch(e){}
+if(!LN[L]){const b=(navigator.language||'en').slice(0,2);L=LN[b]?b:'en'}
+function loadT(){try{TC=JSON.parse(localStorage.getItem('qm_t_'+L)||'{}')}catch(e){TC={}}}
+loadT();document.documentElement.lang=L;
+$('#lg').innerHTML=Object.entries(LN).map(([k,v])=>`<option value="${k}" ${k===L?'selected':''}>${v}</option>`).join('');
+function setL(v){L=v;try{localStorage.setItem('qm_l',v)}catch(e){}document.documentElement.lang=v;loadT();draw()}
+function tl(){if(L==='en')return;const ns=[],w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:n=>/\p{L}/u.test(n.nodeValue)&&!n.parentElement.closest('script,style,select,#toast,.logo,#nm')?1:3});while(w.nextNode())ns.push(w.currentNode);ns.forEach(n=>{n._o??=n.nodeValue;const k=n._o.trim();if(TC[k])n.nodeValue=n._o.replace(k,()=>TC[k])});fetchT(ns.map(n=>n._o))}
+async function fetchT(list){if(L==='en'||busy)return;const m=[...new Set(list.map(s=>s.trim()))].filter(k=>k.length>2&&/\p{L}/u.test(k)&&!TC[k]);if(!m.length)return;busy=true;const lg=L;toast('Translating…');
+try{const sm=await claude.use('sample');if(!sm){toast('Auto-translate needs Claude. Try your browser’s translate feature.');busy=false;return}
+for(let i=0;i<m.length;i+=40){const c=m.slice(i,i+40);const r=await sm.json('Translate each string in this JSON array from English to '+LN[lg]+'. Keep numbers, emoji, math symbols and names. Reply with only a JSON array of the same length.\n'+JSON.stringify(c));if(Array.isArray(r)&&r.length===c.length)c.forEach((k,j)=>TC[k]=String(r[j]))}
+try{localStorage.setItem('qm_t_'+lg,JSON.stringify(TC))}catch(e){}}catch(e){toast('Translation unavailable right now.')}
+busy=false;if(lg===L)tl()}
+save();draw();
+</script>
+</body>
+</html>
